@@ -14,8 +14,8 @@ defmodule Skynet.Application do
       {Phoenix.PubSub, name: Skynet.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Skynet.Finch},
-      # Start a worker by calling: Skynet.Worker.start_link(arg)
-      # {Skynet.Worker, arg},
+      {Registry, keys: :unique, name: Skynet.CyborgRegistry},
+      {DynamicSupervisor, name: Skynet.Supervisors.TerminatorSupervisor},
       # Start to serve requests, typically the last entry
       SkynetWeb.Endpoint
     ]

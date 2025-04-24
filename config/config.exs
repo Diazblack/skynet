@@ -61,6 +61,11 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :skynet, Terminator,
+  [
+    combat_timer: 10000, # 10 sec
+    spawn_timer: 5000 # 5 sec
+  ]
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
