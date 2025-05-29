@@ -5,8 +5,9 @@ defmodule Skynet.TerminatorTest do
   alias Skynet.Supervisors.TerminatorSupervisor
 
   setup_all do
+    pid = Process.whereis(TerminatorSupervisor)
     start_supervised!({Registry, keys: :unique, name: FakeRegistryTest })
-    [supervisor_pid: Process.whereis(TerminatorSupervisor), registry: FakeRegistryTest]
+    [supervisor_pid: pid, registry: FakeRegistryTest]
   end
 
   describe "start_link/1" do
