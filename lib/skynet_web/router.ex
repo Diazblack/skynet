@@ -18,8 +18,15 @@ defmodule SkynetWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+
   end
 
+  scope "/api/v1", SkynetWeb do
+      pipe_through [:api]
+
+      resources "/terminators", TerminatorController, only: ~w[index]a
+    end
   # Other scopes may use custom stacks.
   # scope "/api", SkynetWeb do
   #   pipe_through :api

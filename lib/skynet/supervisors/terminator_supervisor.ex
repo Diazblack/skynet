@@ -26,11 +26,11 @@ defmodule Skynet.Supervisors.TerminatorSupervisor do
 
   def terminator_list(registry \\ Skynet.CyborgRegistry) do
     Registry.select(registry, [
-  {
-    {:"$1", :"$2", :"$3"},
-    [],
-    [{{:"$1", :"$2", :"$3"}}]
-  }
-])
+      {
+        {:"$1", :"$2", :"$3"},
+        [],
+        [%{id: :"$1", pid: :"$2", value: :"$3"}]
+      }
+    ])
   end
 end
