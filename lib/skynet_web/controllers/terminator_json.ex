@@ -16,8 +16,7 @@ defmodule SkynetWeb.TerminatorJSON do
 
   defp data(terminator) do
     %{
-      id: terminator.id,
-      pid: terminator.pid
+      id: terminator.id
     }
   end
 end

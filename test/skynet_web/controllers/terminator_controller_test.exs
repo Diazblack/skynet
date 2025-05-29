@@ -1,7 +1,7 @@
 defmodule SkynetWeb.TerminatorControllerTest do
   use SkynetWeb.ConnCase
 
-  alias Skynet.GenServer.Terminator
+  # alias Skynet.GenServer.Terminator
   alias Skynet.Supervisors.TerminatorSupervisor
 
   setup %{conn: conn} do
@@ -10,7 +10,6 @@ defmodule SkynetWeb.TerminatorControllerTest do
     assert {:ok, t2_pid} = TerminatorSupervisor.create_terminator()
     assert {:ok, t3_pid} = TerminatorSupervisor.create_terminator()
     assert {:ok, t4_pid} = TerminatorSupervisor.create_terminator()
-    IO.inspect(t1_pid)
     on_exit(fn -> DynamicSupervisor.stop(pid, :normal)  end)
 
     [
@@ -21,7 +20,7 @@ defmodule SkynetWeb.TerminatorControllerTest do
   end
 
   describe "index" do
-    test "lists all terminators", %{conn: conn, terminator_ids: [pid_1, pid_2, pid_3, pid_4]} do
+    test "lists all terminators", %{conn: conn} do
       response =
         conn
         |> get(~p"/api/v1/terminators")
@@ -31,23 +30,19 @@ defmodule SkynetWeb.TerminatorControllerTest do
     end
   end
 
-  # describe "create terminator" do
-  #   test "renders terminator when data is valid", %{conn: conn} do
-  #     conn = post(conn, ~p"/api/v1/terminators")
-  #     assert %{"id" => id} = json_response(conn, 201)["data"]
+  describe "create terminator" do
+    test "renders terminator when data is valid", %{conn: conn} do
+      conn = post(conn, ~p"/api/v1/terminators")
+      assert %{"id" => _id} = json_response(conn, 201)["data"]
+    end
 
-  #     conn = get(conn, ~p"/api/v1/terminators/#{id}")
-
-  #     assert %{
-  #              "id" => ^id
-  #            } = json_response(conn, 200)["data"]
-  #   end
-
-  #   test "renders errors when data is invalid", %{conn: conn} do
-  #     conn = post(conn, ~p"/api/v1/terminators", terminator: @invalid_attrs)
-  #     assert json_response(conn, 422)["errors"] != %{}
-  #   end
-  # end
+    test "renders errors when data is invalid", %{conn: conn, supervisor_id: pid } do
+      DynamicSupervisor.stop(pid, :normal)
+      Process.sleep(500)
+      conn = post(conn, ~p"/api/v1/terminators")
+      assert json_response(conn, 422)["errors"] != %{}
+    end
+  end
 
   # describe "delete terminator" do
   #   test "deletes chosen terminator", %{conn: conn} do

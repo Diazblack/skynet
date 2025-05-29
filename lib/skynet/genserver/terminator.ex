@@ -33,6 +33,10 @@ defmodule Skynet.GenServer.Terminator do
     pid
   end
 
+  def get_id(pid) do
+    GenServer.call(pid, :get_id)
+  end
+
   @impl true
   def init([id: id, supervisor: _, registry: _] = opts) do
     Logger.info("Initiating Terminator #{id}")
@@ -49,7 +53,7 @@ defmodule Skynet.GenServer.Terminator do
 
   @impl true
   def handle_info(:combat, state) do
-    Logger.info("Terminator #{state[:id]}, encouter with human forces")
+    Logger.info("Terminator #{state[:id]}, encounter with human forces")
     if :rand.uniform() <= 0.25 do # equal to 25%
       {:stop, :killed_by_sarah_connor, state}
       else
@@ -69,10 +73,22 @@ defmodule Skynet.GenServer.Terminator do
   end
 
   @impl true
-  def terminate(:kill_command, [id: id]) do
+  def handle_call(:get_id, _from, [{:id, id} | _tail] = state) do
+    {:reply, id, state}
+  end
+
+  @impl true
+  def terminate(:kill_command, [{:id, id} | _tails]) do
     Logger.info("Terminator #{id}, initiating self destruct sequence ")
     :shotdown
   end
+
+  @impl true
+  def terminate(:killed_by_sarah_connor, [{:id, id} | _tails]) do
+    Logger.info("Terminator #{id}, was killed by Sarah Connor")
+    :shotdown
+  end
+
 
   def get_spawn_timeout, do: @spawn_timer
   def get_combat_timeout, do: @combat_timer
