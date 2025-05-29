@@ -4,7 +4,9 @@ defmodule Skynet.TerminatorSupervisorTest do
   alias Skynet.Supervisors.TerminatorSupervisor
 
   setup do
-    [supervisor_pid: Process.whereis(TerminatorSupervisor)]
+    pid = Process.whereis(TerminatorSupervisor)
+    on_exit(fn -> DynamicSupervisor.stop(pid, :normal)  end)
+    [supervisor_pid: pid]
   end
 
   describe "create_terminator" do
