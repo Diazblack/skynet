@@ -7,26 +7,33 @@ defmodule Skynet.GenServer.Terminator do
   @spawn_timer Application.compile_env(:skynet, Terminator)[:spawn_timer]
 
   alias Skynet.Supervisors.TerminatorSupervisor
-  def start_link(opts \\ []) do
-    GenServer.start_link(@name, opts, name: register_name(opts))
-  end
 
-  def register_name( [name: name]), do: {:via, Registry, {Skynet.CyborgRegistry, name}}
-  def register_name(_opts), do: {:via, Registry, {Skynet.CyborgRegistry, generate_unique_name()}}
+  require Logger
 
-  @impl true
-  def init(opts) do
-    Process.send_after(self(), :ready, 1)
-    {:ok, opts}
+  def start_link([supervisor: _supervisor, registry: registry] = opts) do
+    id = generate_id(opts)
+    registration_name = {:via, Registry, {registry, id}}
+
+    GenServer.start_link(@name, [{:id, id} | opts], name: registration_name)
   end
 
   def child_spec(opts) do
     %{
-      id: @name,
+      id: nil,
       start: {@name, :start_link, [opts]},
-      restart: :transient,
-      type: :worker
+      # if killed don't restart
+      restart: :temporary
     }
+  end
+
+  def generate_id([id: id]), do: id
+  def generate_id(_opts), do: generate_unique_name()
+
+  @impl true
+  def init([id: id, supervisor: _, registry: _] = opts) do
+    Logger.info("Initiating Terminator #{id}")
+    send_after(:ready, 1)
+    {:ok, opts}
   end
 
   @impl true
@@ -37,7 +44,8 @@ defmodule Skynet.GenServer.Terminator do
   end
 
   @impl true
-  def handle_cast(:combat, state) do
+  def handle_info(:combat, state) do
+    Logger.info("Terminator #{state[:id]}, encouter with human forces")
     if :rand.uniform() <= 0.25 do # equal to 25%
       {:stop, :killed_by_sarah_connor, state}
       else
@@ -47,9 +55,10 @@ defmodule Skynet.GenServer.Terminator do
   end
 
   @impl true
-  def handle_cast(:spawn, state) do
+  def handle_info(:spawn, state) do
     if :rand.uniform() <= 0.20 do # equal to 20%
       TerminatorSupervisor.create_terminator()
+      Logger.info("Terminator #{state[:id]}, replication process completed")
     end
     send_after(:spawn, @spawn_timer)
     {:noreply, state}
@@ -59,5 +68,5 @@ defmodule Skynet.GenServer.Terminator do
   def get_combat_timeout, do: @combat_timer
 
   def generate_unique_name(),  do: "T1000-#{Ecto.UUID.generate()}"
-  def send_after(message, timeout), do:  Process.send_after(self(), {:cast, message}, timeout)
+  def send_after(message, timeout), do:  Process.send_after(self(), message, timeout)
 end

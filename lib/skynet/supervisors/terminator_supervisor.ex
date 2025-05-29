@@ -14,8 +14,8 @@ defmodule Skynet.Supervisors.TerminatorSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  def create_terminator(opts \\ []) do
-    spec = {Terminator, opts}
+  def create_terminator(supervisor \\ @name, registry \\ Skynet.CyborgRegistry) do
+    spec = Terminator.child_spec(supervisor: supervisor, registry: registry)
     DynamicSupervisor.start_child(@name, spec)
   end
 end
