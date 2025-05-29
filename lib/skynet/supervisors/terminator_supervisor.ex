@@ -18,4 +18,19 @@ defmodule Skynet.Supervisors.TerminatorSupervisor do
     spec = Terminator.child_spec(supervisor: supervisor, registry: registry)
     DynamicSupervisor.start_child(@name, spec)
   end
+
+  def kill_terminator(id, supervisor \\ @name, registry \\ Skynet.CyborgRegistry) do
+    pid = Terminator.get_pid(id, registry)
+    DynamicSupervisor.terminate_child(supervisor, pid)
+  end
+
+  def terminator_list(registry \\ Skynet.CyborgRegistry) do
+    Registry.select(registry, [
+  {
+    {:"$1", :"$2", :"$3"},
+    [],
+    [{{:"$1", :"$2", :"$3"}}]
+  }
+])
+  end
 end

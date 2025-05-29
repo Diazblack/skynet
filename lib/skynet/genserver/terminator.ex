@@ -2,14 +2,13 @@ defmodule Skynet.GenServer.Terminator do
   use GenServer
 
   @name __MODULE__
-
+  @registry Skynet.CyborgRegistry
   @combat_timer Application.compile_env(:skynet, Terminator)[:combat_timer]
   @spawn_timer Application.compile_env(:skynet, Terminator)[:spawn_timer]
 
   alias Skynet.Supervisors.TerminatorSupervisor
 
   require Logger
-
   def start_link([supervisor: _supervisor, registry: registry] = opts) do
     id = generate_id(opts)
     registration_name = {:via, Registry, {registry, id}}
@@ -28,6 +27,11 @@ defmodule Skynet.GenServer.Terminator do
 
   def generate_id([id: id]), do: id
   def generate_id(_opts), do: generate_unique_name()
+
+  def get_pid(id, registry \\ @registry ) do
+    [{pid, _ } | _] = Registry.lookup(registry, id)
+    pid
+  end
 
   @impl true
   def init([id: id, supervisor: _, registry: _] = opts) do
@@ -62,6 +66,12 @@ defmodule Skynet.GenServer.Terminator do
     end
     send_after(:spawn, @spawn_timer)
     {:noreply, state}
+  end
+
+  @impl true
+  def terminate(:kill_command, [id: id]) do
+    Logger.info("Terminator #{id}, initiating self destruct sequence ")
+    :shotdown
   end
 
   def get_spawn_timeout, do: @spawn_timer
