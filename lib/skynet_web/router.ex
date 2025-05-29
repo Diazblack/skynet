@@ -25,7 +25,7 @@ defmodule SkynetWeb.Router do
   scope "/api/v1", SkynetWeb do
       pipe_through [:api]
 
-      resources "/terminators", TerminatorController, only: ~w[index create]a
+      resources "/terminators", TerminatorController, only: ~w[index create delete]a
     end
   # Other scopes may use custom stacks.
   # scope "/api", SkynetWeb do

@@ -1,15 +1,15 @@
 defmodule SkynetWeb.TerminatorControllerTest do
   use SkynetWeb.ConnCase
 
-  # alias Skynet.GenServer.Terminator
+  alias Skynet.GenServer.Terminator
   alias Skynet.Supervisors.TerminatorSupervisor
 
   setup %{conn: conn} do
     pid = Process.whereis(TerminatorSupervisor)
-    assert {:ok, t1_pid} = TerminatorSupervisor.create_terminator()
-    assert {:ok, t2_pid} = TerminatorSupervisor.create_terminator()
-    assert {:ok, t3_pid} = TerminatorSupervisor.create_terminator()
-    assert {:ok, t4_pid} = TerminatorSupervisor.create_terminator()
+    {:ok, t1_pid} = TerminatorSupervisor.create_terminator()
+    {:ok, t2_pid} = TerminatorSupervisor.create_terminator()
+    {:ok, t3_pid} = TerminatorSupervisor.create_terminator()
+    {:ok, t4_pid} = TerminatorSupervisor.create_terminator()
     on_exit(fn -> DynamicSupervisor.stop(pid, :normal)  end)
 
     [
@@ -44,14 +44,14 @@ defmodule SkynetWeb.TerminatorControllerTest do
     end
   end
 
-  # describe "delete terminator" do
-  #   test "deletes chosen terminator", %{conn: conn} do
-  #     conn = delete(conn, ~p"/api/v1/terminators/#{terminator}")
-  #     assert response(conn, 204)
+  describe "delete terminator" do
+    test "deletes chosen terminator", %{conn: conn} do
+      {:ok, pid} = TerminatorSupervisor.create_terminator()
+      id = Terminator.get_id(pid)
 
-  #     assert_error_sent 404, fn ->
-  #       get(conn, ~p"/api/v1/terminators/#{terminator}")
-  #     end
-  #   end
-  # end
+      conn = delete(conn, ~p"/api/v1/terminators/#{id}")
+      assert response(conn, 204)
+
+    end
+  end
 end

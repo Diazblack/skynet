@@ -22,7 +22,10 @@ defmodule SkynetWeb.TerminatorController do
     end
   end
 
-  def delete(conn, %{"id" => _id}) do
+  def delete(conn, %{"id" => id}) do
+    TerminatorSupervisor.kill_terminator(id)
     conn
+    |> put_status(:no_content)
+    |> render(:delete, terminator: nil)
   end
 end

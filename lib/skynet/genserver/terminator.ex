@@ -89,7 +89,6 @@ defmodule Skynet.GenServer.Terminator do
     :shotdown
   end
 
-
   def get_spawn_timeout, do: @spawn_timer
   def get_combat_timeout, do: @combat_timer
 

@@ -14,6 +14,10 @@ defmodule SkynetWeb.TerminatorJSON do
     %{data: data(terminator)}
   end
 
+  def delete(_terminator) do
+    %{}
+  end
+
   defp data(terminator) do
     %{
       id: terminator.id
